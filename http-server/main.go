@@ -1,7 +1,7 @@
 package main
 
 import (
-	"http-server/handlers"
+	"github.com/jabernardo/tuts/http-server/handlers"
 	"log"
 	"net/http"
 )
