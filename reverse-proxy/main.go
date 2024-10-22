@@ -13,9 +13,10 @@ import (
 )
 
 type Endpoint struct {
-	Name string `yaml:name`
-	Path string `yaml:path`
-	Dest string `yaml:dest`
+	Name    string `yaml:name`
+	Pattern string `yaml:pattern`
+	Path    string `yaml:path`
+	Dest    string `yaml:dest`
 }
 
 type Config struct {
@@ -46,17 +47,17 @@ func main() {
 
 		log.Printf("Adding Proxy for [%s] Path \"%s\" to \"%s\"", curr.Name, curr.Path, curr.Dest)
 
-		mux.HandleFunc(curr.Path, func(w http.ResponseWriter, r *http.Request) {
+		mux.HandleFunc(curr.Pattern, func(w http.ResponseWriter, r *http.Request) {
 			proxy := httputil.ReverseProxy{
 				Rewrite: func(req *httputil.ProxyRequest) {
 					p, _ := url.Parse(curr.Dest)
-					p.Path = strings.TrimRight(strings.TrimLeft(r.URL.Path, curr.Path), "/")
+					req.SetURL(p)
 
 					req.SetXForwarded()
 					req.Out.Header.Add("Custom-Header", "Value")
+					req.Out.URL.Path = strings.TrimRight(strings.TrimPrefix(r.URL.Path, curr.Path), "/")
 
-					log.Printf("[%s] %s -> %s", curr.Dest, r.URL, p.Path)
-					req.SetURL(p)
+					log.Printf("[%s] %s -> %s", curr.Dest, r.URL.Path, p)
 				},
 			}
 

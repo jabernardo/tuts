@@ -2,5 +2,6 @@ host: localhost
 port: 3000
 resources:
   - name: google
-    path: /search
+    pattern: /search
+    path:
     dest: https://www.google.com/
